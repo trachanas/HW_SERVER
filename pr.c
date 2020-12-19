@@ -10,9 +10,56 @@
 #include <ctype.h>
 
 int main(){
-    char *a = "aaaa";
-    printf("%d\n", atoi(a));
-    if(isnumber(atoi(a)) == 0){
-        printf("Is number\n");
+
+    char buffer[100];
+    char *token = NULL;
+    memset(buffer, '\0', 100);
+
+    int a = 0;
+    int b = 0;
+    printf("%d\n", a);
+    while(fgets(buffer, 100, stdin) != NULL){
+
+        buffer[strlen(buffer) - 1] = '\0';
+
+
+        token = strtok(buffer,"+-*/");
+        a = atoi(token);
+        token = strtok(NULL, "+-*/");
+        b = atoi(token);
+
+
+
+        printf("a = %d \t b = %d\n", a, b);
+        if (strchr(buffer, '*') != NULL){
+            printf("%d * %d = %d\n", a, b, a * b);
+        }
+        if (strchr(buffer, '+') != NULL){
+            printf("%d + %d = %d\n", a, b, a + b);
+        }
+        if (strchr(buffer, '-') != NULL){
+            printf("%d - %d = %d\n", a, b, a - b);
+        }
+        if (strchr(buffer, '/') !=NULL){
+            printf("%d / %d = %d\n", a, b, a / b);
+        }
+
     }
+
+//    // * = 42
+//    char c = '*';
+//    printf("%c = %d\n", c,c);
+//
+//    // - = 45
+//    c = '-';
+//    printf("%c = %d\n", c,c);
+//
+//    // + = 43
+//    c = '+';
+//    printf("%c = %d\n", c, c);
+//
+//    // / = 47
+//    c = '/';
+//    printf("%c = %d\n", c, c);
+
 }

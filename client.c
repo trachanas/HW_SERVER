@@ -12,19 +12,11 @@
 #include <pthread.h>
 #include <signal.h>
 #include <arpa/inet.h>
-#define PORT 8080
-#define SA struct sockaddr
 
 
 #define RED   "\x1B[31m"
 #define GRN   "\x1B[32m"
 #define RESET "\x1B[0m"
-
-
-char *clientIP;
-int err;
-int mySocket;
-
 
 
 
@@ -63,132 +55,99 @@ char *getMyIP() {
 }
 
 
-struct sockaddr_in server;
-struct sockaddr *serverPtr = (struct sockaddr *) &server;
-struct hostent *hostPtr;
-struct in_addr addr;
 
 
 
 int main(int argc, char **argv){
 
-    if (argc != 4){
+    if (argc != 7){
         printf("Wrong arguments!");
         return EXIT_FAILURE;
     }
-    int portNum = 1000;
-    char *dirName;
-    int workerThreads;
-    int bufferSize;
-    int serverPort;
+
     char *serverIP = NULL;
-    int portN;
+    int serverPortNum = -1;
+    int clientPortNum = -1;
+    char readBuffer[1000];
 
     char writeBuffer[1000];
 
-    char *pathname = NULL;
-    char *message = malloc(100 * sizeof(char));
-    char *token = NULL;
-    char *rest;
-    char *rMessage;
-    char *userOnIP;
+    for (int i = 1; i < argc; i += 2){
 
-    int nClientPort = -1;
-    int bytes;
-    int numOfClients;
-    int userOnPort;
+        if (strcmp(argv[i],"-sip") == 0)  serverIP = strdup(argv[i+1]);
 
-    struct in_addr clientAddr;
+        else if (strcmp(argv[i], "-spn") == 0)  serverPortNum = atoi(argv[i+1]);
 
-    serverPort = atoi(argv[1]);
-    portN = (int) atoi(argv[2]);
-    serverIP = strdup(argv[3]);
+        else if (strcmp(argv[i], "-pn") == 0)   clientPortNum = atoi(argv[i+1]);
 
-    printf("Client is listening in %d\n", portN);
+        else {
+            printf("Wrong arguments!\n");
+            return EXIT_FAILURE;
+        }
+    }
 
-// Create socket
+    printf("Client is listening to port: %d\n", clientPortNum);
+
+    int mySocket, fd;
+
     mySocket = socket(AF_INET, SOCK_STREAM, 0);
-
-    if (mySocket == -1) {
-        perror("<Creating socket failed!>");
-        exit(-1);
+    if (mySocket == -1){
+        printf("Socket creation failed!\nPlease exit!\n");
+        return EXIT_FAILURE;
     }
 
-    inet_aton(serverIP, &addr);
 
-    if ((hostPtr = gethostbyaddr(&addr, sizeof(addr), AF_INET)) == NULL) {
-        herror("<GetHostByAddr failed!>\n");
-        exit(-1);
+    int option = 1;
+
+    // kill "Address already in use" error message || Reuse the same port
+    if (setsockopt(mySocket, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(int)) == -1) {
+        perror("setsockopt");
+        return -1;
     }
 
+    struct sockaddr_in server,client;
+    struct sockaddr *serverPtr = (struct sockaddr *)&server;
+    struct sockaddr *clientPtr = (struct sockaddr *)&client;
+
+    // ip  and portnumber for the server
     server.sin_family = AF_INET;
+    server.sin_addr.s_addr = inet_addr(serverIP);
+    server.sin_port = htons(serverPortNum);
+    socklen_t socklen = sizeof(client);
 
-    memcpy(&server.sin_addr, hostPtr->h_addr, hostPtr->h_length);
-
-    server.sin_port = htons(serverPort);
-    if (connect(mySocket, serverPtr, sizeof(server)) < 0) {
-        perror("<Connect failed!>");
-        exit(-1);
+    // connect the client socket to server socket
+    if (connect(mySocket, serverPtr, sizeof(server)) != 0) {
+        printf("connection with the server failed...\n");
+        exit(0);
     }
 
-    clientIP = getMyIP();
 
-    nClientPort = htons(portNum);
 
-    inet_aton(clientIP, &clientAddr);
-
-    int client_net_address = clientAddr.s_addr;
-
-    while (1) {
-
+    while(1){
 
         memset(writeBuffer, '\0', 1000);
 
         while (fgets(writeBuffer, 1000, stdin) != NULL){
 
-            writeBuffer[strlen(writeBuffer) -1] = '\0';
-
-            printf(GRN "SENT FROM CLIENT: %s\n" RESET, writeBuffer);
+            writeBuffer[strlen(writeBuffer) - 1] = '\0';
 
             if (strcmp(writeBuffer, "exit") == 0) {
                 printf("Client left!\n");
                 break;
             }
 
-            //stelnw thn IP kai to portNumber tou client
-            strcpy(writeBuffer, clientIP);
-
             write(mySocket, writeBuffer, strlen(writeBuffer));
 
             memset(writeBuffer, '\0', 1000);
 
-            //portnum
-            strcpy(writeBuffer,argv[2]);
+            read(mySocket, readBuffer, 1000);
 
-            write(mySocket, writeBuffer, 1000);
+            printf("%s\n", readBuffer);
 
-            memset(writeBuffer, '\0', 1000);
-            printf("FD IS %d\n", mySocket);
-
-
-
-            //perimenw na diabasw minima apodoxis
-            bytes = read(mySocket, writeBuffer, 1000);
-
-            printf(RED "MESSAGE RECEIVED: %s\n" RESET, writeBuffer);
-
-            memset(writeBuffer, '\0', 1000);
-
+            memset(readBuffer, '\0', 1000);
         }
         break;
 
-        //read(mySocket, writeBuffer, 1000);
-
-       // printf("MESSAGE RECEIVED: %s\n", writeBuffer);
     }
-
-    memset(writeBuffer, '\0', 1000);
-
-    printf("%d\n", argc);
-
+    return 0;
 }
