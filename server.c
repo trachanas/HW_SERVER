@@ -6,18 +6,24 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>
 #include <ctype.h>
-
-
+#include <signal.h>
 #define RED   "\x1B[31m"
 #define GRN   "\x1B[32m"
 #define RESET "\x1B[0m"
-#define SA struct sockaddr
+
+
+char *mes = NULL;
+char *resultString = NULL;
 
 void signal_handler(){
 
-    printf("Server is down!\nGoodbye!\n");
+    printf("\nServer is down!\nGoodbye!\n");
+
+    free(resultString);
+
+    free(mes);
+
     exit(1);
 
 }
@@ -25,12 +31,23 @@ void signal_handler(){
 
 int main(int argc, char **argv) {
 
+    int bytes = -1;
+    char readBuffer[1000];
+    char *token = NULL;
+    int a , b, result;
+    int serverPortNum = -1;
+    int mySocket, fd;
+    int option = 1;
+
+    struct sockaddr_in server,client;
+    struct sockaddr *serverPtr = (struct sockaddr *)&server;
+    struct sockaddr *clientPtr = (struct sockaddr *)&client;
+
+
     if (argc != 3){
         printf("Wrong number of arguments!\n");
         return EXIT_FAILURE;
     }
-
-    int serverPortNum = -1;
 
 
     for (int i = 1; i < argc; i += 2){
@@ -44,9 +61,6 @@ int main(int argc, char **argv) {
 
     printf("Server is listening to port: %d\n", serverPortNum);
 
-    int mySocket, fd;
-
-
     //socket creation
     mySocket = socket(AF_INET, SOCK_STREAM, 0);
     if (mySocket == -1) {
@@ -54,17 +68,12 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    int option = 1;
 
     // kill "Address already in use" error message || Reuse the same port
     if (setsockopt(mySocket, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(int)) == -1) {
-        perror("setsockopt");
-        return -1;
+        printf("SetSockOpt failed!\nPlease exit!\n");
+        return EXIT_FAILURE;
     }
-
-    struct sockaddr_in server,client;
-    struct sockaddr *serverPtr = (struct sockaddr *)&server;
-    struct sockaddr *clientPtr = (struct sockaddr *)&client;
 
     // ip  and portnumber for the server
     server.sin_family = AF_INET;
@@ -85,12 +94,6 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    int bytes = -1;
-    char readBuffer[1000];
-    char *token = NULL;
-    char *mes = NULL;
-    int a , b, result;
-    char *resultString = NULL;
     signal(SIGINT, signal_handler);
 
     while (1){
@@ -141,10 +144,6 @@ int main(int argc, char **argv) {
         }
 
     }
-
-
-
-
 
     return 0;
 }
