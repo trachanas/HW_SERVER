@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
     }
 
     signal(SIGINT, signal_handler);
-
+    signal(SIGTSTP, SIG_IGN);
     while (1){
 
         fd = accept(mySocket, clientPtr, &socklen);
