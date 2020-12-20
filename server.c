@@ -19,7 +19,7 @@ void signal_handler(){
 
     printf("\nServer is down!\nGoodbye!\n");
 
-    free(mes);
+    //free(mes);
 
     exit(1);
 
@@ -139,6 +139,8 @@ int main(int argc, char **argv) {
             sprintf(resultString, "%d", result);
 
             write(fd, resultString, 1000);
+
+            free(mes);
 
             memset(resultString, '\0', 1000);
 
