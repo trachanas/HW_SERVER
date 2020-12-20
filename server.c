@@ -14,13 +14,10 @@
 
 
 char *mes = NULL;
-char *resultString = NULL;
 
 void signal_handler(){
 
     printf("\nServer is down!\nGoodbye!\n");
-
-    free(resultString);
 
     free(mes);
 
@@ -33,6 +30,7 @@ int main(int argc, char **argv) {
 
     int bytes = -1;
     char readBuffer[1000];
+    char resultString[1000];
     char *token = NULL;
     int a = -1, b = -1, result = -1;
     int serverPortNum = -1;
@@ -136,11 +134,13 @@ int main(int argc, char **argv) {
                 //printf("%d / %d = %d\n", a, b, a / b);
             }
 
-            resultString = malloc(100 * sizeof(char));
+            memset(resultString, '\0', 1000);
 
             sprintf(resultString, "%d", result);
 
             write(fd, resultString, 1000);
+
+            memset(resultString, '\0', 1000);
 
             memset(readBuffer, '\0', 1000);
         }
