@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
     int bytes = -1;
     char readBuffer[1000];
     char *token = NULL;
-    int a , b, result;
+    int a = -1, b = -1, result = -1;
     int serverPortNum = -1;
     int mySocket, fd;
     int option = 1;
@@ -43,6 +43,8 @@ int main(int argc, char **argv) {
     struct sockaddr *serverPtr = (struct sockaddr *)&server;
     struct sockaddr *clientPtr = (struct sockaddr *)&client;
 
+    mes = NULL;
+    memset(readBuffer, '\0', 1000);
 
     if (argc != 3){
         printf("Wrong number of arguments!\n");

@@ -1,15 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <pthread.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
-#include <netdb.h>
 #include <dirent.h>
-#include <ifaddrs.h>
 #include <string.h>
-#include <pthread.h>
 #include <signal.h>
 #include <arpa/inet.h>
 
@@ -19,6 +14,18 @@
 #define RESET "\x1B[0m"
 
 
+char *serverIP = NULL;
+
+void signal_handler() {
+
+    printf("\nClient left with SIGINT!\nGoodbye!\n");
+
+    free(serverIP);
+
+    exit(1);
+}
+
+
 int main(int argc, char **argv){
 
     if (argc != 7){
@@ -26,7 +33,6 @@ int main(int argc, char **argv){
         return EXIT_FAILURE;
     }
 
-    char *serverIP = NULL;
     int serverPortNum = -1;
     int clientPortNum = -1;
     int mySocket, fd;
@@ -86,6 +92,8 @@ int main(int argc, char **argv){
     }
 
 
+    signal(SIGINT, signal_handler);
+
     while(1){
 
         memset(writeBuffer, '\0', 1000);
@@ -99,6 +107,7 @@ int main(int argc, char **argv){
                 free(serverIP);
 
                 printf("Client left!\n");
+
                 break;
             }
 
