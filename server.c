@@ -36,6 +36,8 @@ int main(int argc, char **argv) {
     int serverPortNum = -1;
     int mySocket, fd;
     int option = 1;
+    //pid_t p = fork();
+    pid_t p;
 
     struct sockaddr_in server,client;
     struct sockaddr *serverPtr = (struct sockaddr *)&server;
@@ -83,16 +85,17 @@ int main(int argc, char **argv) {
 
 
     //bind the socket
-    if (bind(mySocket, serverPtr, sizeof (server)) != 0){
+    if (bind(mySocket, serverPtr, sizeof (server)) < 0){
         printf("Socket binding failed!\nPlease exit!\n");
         return EXIT_FAILURE;
     }
 
     //listen
-    if ((listen(mySocket, 5)) != 0) {
+    if ((listen(mySocket, 5)) < 0) {
         printf("Socket listening failed!\nPlease exit!\n");
         return EXIT_FAILURE;
     }
+
 
     signal(SIGINT, signal_handler);
     signal(SIGTSTP, SIG_IGN);
@@ -104,48 +107,61 @@ int main(int argc, char **argv) {
             return EXIT_FAILURE;
         }
 
-        while ((bytes = read(fd, readBuffer, 1000)) > 0){
+        p = fork();
 
-            printf(RED "MESSAGE RECEIVED FROM CLIENT: %s\n" RESET, readBuffer);
+        if (p == 0){
 
-            mes = strdup(readBuffer);
+            close(mySocket);
 
-            token = strtok(readBuffer,"+-*/");
-            a = atoi(token);
-            token = strtok(NULL, "+-*/");
-            b = atoi(token);
+            while ((bytes = read(fd, readBuffer, 1000)) > 0){
 
-            printf("a = %d \t b = %d\n", a, b);
-            if (strchr(mes, '*') != NULL){
-                result = a * b;
-                //printf("%d * %d = %d\n", a, b, a * b);
+                printf(RED "MESSAGE RECEIVED FROM CLIENT: %s\n" RESET, readBuffer);
+
+                mes = strdup(readBuffer);
+
+                token = strtok(readBuffer,"+-*/");
+                a = atoi(token);
+                token = strtok(NULL, "+-*/");
+                b = atoi(token);
+
+                printf("a = %d \t b = %d\n", a, b);
+                if (strchr(mes, '*') != NULL){
+                    result = a * b;
+                    //printf("%d * %d = %d\n", a, b, a * b);
+                }
+                if (strchr(mes, '+') != NULL){
+                    result = a + b;
+                    //printf("%d + %d = %d\n", a, b, a + b);
+                }
+                if (strchr(mes, '-') != NULL){
+                    result = a - b;
+
+                    //printf("%d - %d = %d\n", a, b, a - b);
+                }
+                if (strchr(mes, '/') !=NULL){
+                    result = a / b;
+                    //printf("%d / %d = %d\n", a, b, a / b);
+                }
+
+                memset(resultString, '\0', 1000);
+
+                sprintf(resultString, "%d", result);
+
+                write(fd, resultString, 1000);
+
+                free(mes);
+
+                memset(resultString, '\0', 1000);
+
+                memset(readBuffer, '\0', 1000);
             }
-            if (strchr(mes, '+') != NULL){
-                result = a + b;
-                //printf("%d + %d = %d\n", a, b, a + b);
-            }
-            if (strchr(mes, '-') != NULL){
-                result = a - b;
 
-                //printf("%d - %d = %d\n", a, b, a - b);
-            }
-            if (strchr(mes, '/') !=NULL){
-                result = a / b;
-                //printf("%d / %d = %d\n", a, b, a / b);
-            }
-
-            memset(resultString, '\0', 1000);
-
-            sprintf(resultString, "%d", result);
-
-            write(fd, resultString, 1000);
-
-            free(mes);
-
-            memset(resultString, '\0', 1000);
-
-            memset(readBuffer, '\0', 1000);
         }
+        else {
+            close(fd);
+        }
+
+
 
     }
 
