@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
     int serverPortNum = -1;
     int mySocket, fd;
     int option = 1;
-    //pid_t p = fork();
+
     pid_t p;
 
     struct sockaddr_in server,client;
@@ -160,8 +160,6 @@ int main(int argc, char **argv) {
         else {
             close(fd);
         }
-
-
 
     }
 

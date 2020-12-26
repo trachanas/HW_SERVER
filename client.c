@@ -39,14 +39,11 @@ int main(int argc, char **argv){
     int option = 1;
 
     char readBuffer[1000];
-
     char writeBuffer[1000];
 
     struct sockaddr_in server,client;
     struct sockaddr *serverPtr = (struct sockaddr *)&server;
     struct sockaddr *clientPtr = (struct sockaddr *)&client;
-
-
 
 
     for (int i = 1; i < argc; i += 2){
@@ -87,8 +84,8 @@ int main(int argc, char **argv){
 
     // connect the client socket to server socket
     if (connect(mySocket, serverPtr, sizeof(server)) != 0) {
-        printf("connection with the server failed...\n");
-        exit(0);
+        printf("Connection with the server failed...\n");
+        return EXIT_FAILURE;
     }
 
 
@@ -122,7 +119,6 @@ int main(int argc, char **argv){
             memset(readBuffer, '\0', 1000);
         }
         break;
-
     }
     return 0;
 }
