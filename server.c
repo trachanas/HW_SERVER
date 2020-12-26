@@ -29,8 +29,9 @@ void delete_spaces(char* s) {
 int check (char *s){
 
     char *t = strdup(s);
-    int a, b, c;
-    int ch = sscanf(mes,"%d%c%d",&a, &b, &c);
+    int a, c;
+    char *b;
+    int ch = sscanf(mes,"%d%c%d",&a, b, &c);
 
     if (ch == 3) {
         return 1;
