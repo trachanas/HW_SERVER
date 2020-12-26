@@ -32,18 +32,23 @@ int check (char *s){
 
     char *t = strdup(s);
     int a, c;
-    char *b = NULL;
+    char *b;
     b = calloc(10, sizeof (char));
     int ch = sscanf(t,"%d%c%d",&a, b, &c);
 
     if (ch == 3) {
         if (strchr(b, '+') || strchr(b, '-') || strchr(b, '*') || strchr(b, '/')){
             free(b);
+	    free(t);
             return 1;
         }
+	free(b);
+	free(t);
+	return 0;
     }
     else {
         free(b);
+	free(t);
         return 0;
     }
 
