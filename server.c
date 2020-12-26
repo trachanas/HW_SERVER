@@ -15,33 +15,6 @@
 
 char *mes = NULL;
 
-void delete_spaces(char* s) {
-    const char* d = s;
-    do {
-        while (*d == ' ' || *d == '\t') {
-            ++d;
-        }
-    } while (*s++ = *d++);
-}
-
-//Input: a string
-//Output: 1 if it has the right format, 0 if it it has the wrong
-int check (char *s){
-
-    char *t = strdup(s);
-    int a, c;
-    char *b;
-    int ch = sscanf(mes,"%d%c%d",&a, b, &c);
-
-    if (ch == 3) {
-        return 1;
-    }
-    else {
-        return 0;
-    }
-
-}
-
 void signal_handler(){
 
     printf("\nServer is down!\nGoodbye!\n");
@@ -146,12 +119,7 @@ int main(int argc, char **argv) {
 
                 mes = strdup(readBuffer);
 
-                delete_spaces(mes);
 
-                if (check(mes) == 0) {
-                    printf("Input has wrong format!\nTry again!\n");
-                    continue;
-                }
 
                 token = strtok(readBuffer,"+-*/");
                 a = atoi(token);

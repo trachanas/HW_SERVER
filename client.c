@@ -13,8 +13,42 @@
 #define GRN   "\x1B[32m"
 #define RESET "\x1B[0m"
 
-
 char *serverIP = NULL;
+
+
+
+void delete_spaces(char* s) {
+    const char* d = s;
+    do {
+        while (*d == ' ' || *d == '\t') {
+            ++d;
+        }
+    } while (*s++ = *d++);
+}
+
+//Input: a string
+//Output: 1 if it has the right format, 0 if it it has the wrong
+int check (char *s){
+
+    char *t = strdup(s);
+    int a, c;
+    char *b = NULL;
+    b = calloc(10, sizeof (char));
+    int ch = sscanf(t,"%d%c%d",&a, b, &c);
+
+    if (ch == 3) {
+        if (strchr(b, '+') || strchr(b, '-') || strchr(b, '*') || strchr(b, '/')){
+            free(b);
+            return 1;
+        }
+    }
+    else {
+        free(b);
+        return 0;
+    }
+
+}
+
 
 void signal_handler() {
 
@@ -40,6 +74,7 @@ int main(int argc, char **argv){
 
     char readBuffer[1000];
     char writeBuffer[1000];
+    char *temp = NULL;
 
     struct sockaddr_in server,client;
     struct sockaddr *serverPtr = (struct sockaddr *)&server;
@@ -106,6 +141,15 @@ int main(int argc, char **argv){
                 printf("Client left!\n");
 
                 break;
+            }
+
+
+
+            delete_spaces(writeBuffer);
+
+            if (check(writeBuffer) == 0) {
+                printf("Input has wrong format!\nTry again!\n");
+                continue;
             }
 
             write(mySocket, writeBuffer, strlen(writeBuffer));
